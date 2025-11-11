@@ -1,0 +1,21 @@
+query,gold_idx,method,model,topk_idxs,topk_scores,is_top1_correct
+Which herb helps with skin burns?,0,BM25,,"0,3,2","1.518371343117034,1.1989931069220487,1.1043910791988012",1
+Which herb helps with skin burns?,0,TF-IDF,,"0,2,3","0.2651929782531157,0.21570146106477264,0.13278016326847866",1
+Which herb helps with skin burns?,0,Embeddings,all-MiniLM-L6-v2,"0,3,1","0.663659930229187,0.43166816234588623,0.39657872915267944",1
+Which herb helps with skin burns?,0,Embeddings,multi-qa-MiniLM-L6-dot-v1,"0,3,2","0.7682186365127563,0.6310903429985046,0.6133054494857788",1
+Which plant is used for cough and boosting immunity?,1,BM25,,"1,2,0","2.599834370218508,0.7590211652375685,0.7254558793272559",1
+Which plant is used for cough and boosting immunity?,1,TF-IDF,,"1,4,2","0.46605553816809425,0.1759245396454006,0.1267282725425322",1
+Which plant is used for cough and boosting immunity?,1,Embeddings,all-MiniLM-L6-v2,"1,3,0","0.5100304484367371,0.406460165977478,0.3161972165107727",1
+Which plant is used for cough and boosting immunity?,1,Embeddings,multi-qa-MiniLM-L6-dot-v1,"2,3,1","0.6061915159225464,0.5902448892593384,0.589789867401123",0
+Which herb is antibacterial?,2,BM25,,"3,1,4","1.1989931069220487,0.9992665978366729,0.0",0
+Which herb is antibacterial?,2,TF-IDF,,"3,2,4","0.14317673491774038,0.1408858398371918,0.13789170724288047",0
+Which herb is antibacterial?,2,Embeddings,all-MiniLM-L6-v2,"1,3,2","0.3794921934604645,0.35879817605018616,0.3407086730003357",0
+Which herb is antibacterial?,2,Embeddings,multi-qa-MiniLM-L6-dot-v1,"2,0,4","0.6108765602111816,0.5997710227966309,0.5833113193511963",1
+Which herb reduces stress?,3,BM25,,"3,4,2","1.1989931069220487,0.0,0.0",1
+Which herb reduces stress?,3,TF-IDF,,"3,4,2","0.33065250578579647,0.15922362859138822,0.0",1
+Which herb reduces stress?,3,Embeddings,all-MiniLM-L6-v2,"3,1,0","0.5976555347442627,0.3948555588722229,0.30471497774124146",1
+Which herb reduces stress?,3,Embeddings,multi-qa-MiniLM-L6-dot-v1,"3,0,4","0.6689351201057434,0.6038016676902771,0.5882291793823242",1
+Which plant helps with inflammation?,4,BM25,,"2,4,3","1.1043910791988012,0.0,0.0",0
+Which plant helps with inflammation?,4,TF-IDF,,"2,4,3","0.19924266544408034,0.19500832252166192,0.0",0
+Which plant helps with inflammation?,4,Embeddings,all-MiniLM-L6-v2,"0,4,3","0.4433841109275818,0.43761754035949707,0.4264602065086365",0
+Which plant helps with inflammation?,4,Embeddings,multi-qa-MiniLM-L6-dot-v1,"0,4,3","0.6672293543815613,0.6098109483718872,0.6040013432502747",0

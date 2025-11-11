@@ -4,9 +4,36 @@ import Link from "next/link";
 import { Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth"; // ✅ bring in auth context
+import { useCallback } from "react";
+
+/**
+ * Full fixed Navbar component.
+ *
+ * Fixes applied:
+ * - Use common Google avatar field names (avatar_url, photoURL, picture).
+ * - Provide a secure fallback image.
+ * - Add an onError handler so if the remote image fails, we replace it with fallback.
+ * - Keep structure and styles unchanged.
+ *
+ * Note: If you switch to `next/image` later, you'll need to add Google host to next.config.js.
+ */
 
 export default function Navbar() {
   const { user, loginWithGoogle, logout } = useAuth();
+
+  // Prefer common avatar fields returned by different auth flows.
+  const avatarSrc =
+    user?.avatar_url ?? user?.photoURL ?? user?.picture ?? "/avatar-fallback.png";
+
+  // onError handler for <img> to gracefully fallback to a local image if remote fails
+  const handleAvatarError = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    if (img.src && !img.src.includes("/avatar-fallback.png")) {
+      img.src = "/avatar-fallback.png";
+      // Remove onerror after fallback to avoid infinite loop if fallback also fails
+      img.onerror = null;
+    }
+  }, []);
 
   return (
     <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
@@ -36,11 +63,17 @@ export default function Navbar() {
 
             {user ? (
               <div className="flex items-center gap-3">
-                {user.avatar_url ? (
+                {avatarSrc ? (
+                  // plain <img> used to avoid requiring next.config.js changes
                   <img
-                    src={user.avatar_url}
+                    src={avatarSrc}
                     alt={user.name ?? "avatar"}
                     className="h-8 w-8 rounded-full object-cover"
+                    onError={handleAvatarError}
+                    // referrerPolicy helps with some profile image hosts blocking referers
+                    referrerPolicy="no-referrer"
+                    // crossOrigin can help in some CORS scenarios (optional)
+                    crossOrigin="anonymous"
                   />
                 ) : (
                   <div className="h-8 w-8 rounded-full bg-muted" />

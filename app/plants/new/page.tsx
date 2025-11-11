@@ -195,7 +195,7 @@ function AddPlantInner() {
             value={partsUsed}
             onChange={(e) => setPartsUsed(e.target.value)}
             className="w-full px-3 py-2 border rounded-md"
-            placeholder="Leaves, Seeds, Root"
+            placeholder="Soil type, climate"
           />
         </div>
 

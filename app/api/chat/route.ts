@@ -167,7 +167,7 @@ export async function POST(req: NextRequest) {
 
     // Build prompt: allow own knowledge + prioritize context
     const prompt = `You are an Ayurveda assistant.
-Use the context below if it is relevant, but you can also use your own Ayurvedic knowledge to answer the question.
+Use the context below if it is relevant, but you can also use your own Ayurvedic and plant knowledge to answer the question. If it is not relevant then give generic response that it is out of context.
 Be accurate, practical, and concise. If suggesting remedies, include typical dosage forms and common precautions; advise consulting a qualified practitioner for personalized care.
 
 Context:

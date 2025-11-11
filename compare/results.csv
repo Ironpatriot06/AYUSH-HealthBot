@@ -1,0 +1,5 @@
+method,model,P@1,MRR
+BM25,,0.6,0.75
+TF-IDF,,0.6,0.8
+Embeddings,all-MiniLM-L6-v2,0.6,0.767
+Embeddings,multi-qa-MiniLM-L6-dot-v1,0.6,0.767
