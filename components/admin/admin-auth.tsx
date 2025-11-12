@@ -33,9 +33,10 @@ export default function AdminAuth(): JSX.Element {
       await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/admin`,
+          redirectTo: "https://d112tlzkqjy7m4.cloudfront.net/auth/confirm/",
         },
       });
+      
     } catch (e: any) {
       setMessage(e?.message || "Google sign-in failed");
     } finally {

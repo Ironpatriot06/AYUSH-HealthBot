@@ -99,7 +99,7 @@ export default function Navbar() {
                 onClick={loginWithGoogle}
                 className="hover:bg-transparent hover:text-inherit"
               >
-                Sign In with Google
+                {/* Sign In with Google */}
               </Button>
             )}
           </nav>

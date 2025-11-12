@@ -5,6 +5,7 @@
   "scripts": {
     "ingest": "ts-node --esm scripts/ingest.ts",
     "build": "pnpm run ingest && next build",
+
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start"
