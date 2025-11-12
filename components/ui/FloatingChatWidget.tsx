@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_BASE?.replace(/\/+$/, "") || "";
 
 type Message = {
   id: string;
@@ -92,7 +94,12 @@ export default function FloatingChatWidget() {
     const timeout = setTimeout(() => controller.abort(), CHAT_TIMEOUT_MS);
 
     try {
-      const res = await fetch("/api/chat", {
+      const endpoint = `${API_BASE}/api/chat`; // API Gateway
+      if (!API_BASE) {
+        console.warn("NEXT_PUBLIC_API_BASE is not set; falling back to relative /api/chat");
+      }
+      
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -105,6 +112,7 @@ export default function FloatingChatWidget() {
         }),
         signal: controller.signal,
       });
+      
 
       if (!res.ok) {
         const text = await res.text().catch(() => "");

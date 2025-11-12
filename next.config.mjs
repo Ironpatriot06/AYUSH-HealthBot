@@ -9,6 +9,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-}
+  output: 'export',          // enables static export
+  trailingSlash: true        // optional, useful for S3
+};
 
-export default nextConfig
+// ✅ Use ONLY ESM export (no module.exports in .mjs)
+export default nextConfig;
