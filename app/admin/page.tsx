@@ -3,6 +3,8 @@
 
 import React from "react";
 import { AuthProvider } from "@/lib/auth";
+
+import "../lib/amplify";
 import AdminDashboard from "@/components/admin/admin-dashboard";
 // import AdminAuth from "@/components/admin/admin-auth";
 

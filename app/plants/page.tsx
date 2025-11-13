@@ -1,5 +1,6 @@
 // app/plants/page.tsx
 import Link from "next/link";
+import "../lib/amplify";
 
 export default function PlantsIndex() {
   return (
