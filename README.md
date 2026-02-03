@@ -19,6 +19,17 @@ Ayush Herbal Garden solves this by offering a centralized, searchable, and admin
 ## Vision Statement
 To preserve, organize, and digitally empower traditional Ayurvedic knowledge through a modern, secure, and scalable web platform.
 
+
+## MoSCoW Prioritization
+
+| Priority | Features |
+|--------|---------|
+| Must Have | Plant catalog, Plant detail pages, Admin insert/update, Authentication, Database |
+| Should Have | Search & filters, Preparations, Scientific references |
+| Could Have | Image gallery, Chat logs, Advanced filtering |
+| Won’t Have | Mobile application, Offline access |
+
+
 ## Key Features / Goals
 - Browse and search Ayurvedic plant catalog
 - View detailed plant information (uses, dosage, precautions)
