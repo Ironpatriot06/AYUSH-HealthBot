@@ -29,6 +29,15 @@ To preserve, organize, and digitally empower traditional Ayurvedic knowledge thr
 | Could Have | Image gallery, Chat logs, Advanced filtering |
 | Won’t Have | Mobile application, Offline access |
 
+## 🐳 Quick Start – Local Development (Docker)
+
+### Prerequisites
+- Docker Desktop installed
+
+### Build the Docker image
+```bash
+docker build -t ayush-herbal-garden .
+```
 
 ## Key Features / Goals
 - Browse and search Ayurvedic plant catalog
