@@ -57,7 +57,7 @@ export default function AdminDashboard(): JSX.Element | null {
         const [p, pr, r, im] = await Promise.all([
           supabase.from("plants").select("*", { count: "exact", head: true }),
           supabase.from("preparations").select("*", { count: "exact", head: true }),
-          supabase.from("references").select("*", { count: "exact", head: true }),
+          supabase.from("plant_references").select("*", { count: "exact", head: true }),
           supabase.from("images").select("*", { count: "exact", head: true }),
         ]);
 

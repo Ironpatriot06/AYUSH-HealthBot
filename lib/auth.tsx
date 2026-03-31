@@ -25,15 +25,17 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 function mapSupabaseUser(u: User): AdminUser {
   const metadata = (u.user_metadata ?? {}) as Record<string, any>;
+
   const name =
-    (metadata?.full_name as string) ??
-    (metadata?.name as string) ??
-    (u.email as string | null) ??
+    metadata?.full_name ||
+    metadata?.name ||
+    u.email ||
     null;
 
   const avatar =
-    (metadata?.avatar_url as string) ??
-    (metadata?.picture as string) ??
+    metadata?.avatar_url ||
+    metadata?.picture ||
+    metadata?.avatar ||
     null;
 
   return {
@@ -60,6 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const {
           data: { user: currentUser },
         } = await supabase.auth.getUser();
+        console.log("FULL USER:", currentUser);
 
         if (!mounted) return;
 
@@ -80,10 +83,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     init();
 
-    const { data } = supabase.auth.onAuthStateChange((event, session) => {
-      const u = session?.user ?? null;
-      setUser(u ? mapSupabaseUser(u) : null);
-
+    const { data } = supabase.auth.onAuthStateChange(async (event) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user ? mapSupabaseUser(user) : null);
       if (event === "SIGNED_IN") {
         // fetch("/api/create-profile", { method: "POST" }).catch(() => {});
         try {

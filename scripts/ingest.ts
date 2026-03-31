@@ -155,7 +155,7 @@ async function main() {
 
   const embeddings = new GoogleGenerativeAIEmbeddings({
     apiKey: process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY,
-    model: "models/text-embedding-004",
+    model: "models/gemini-embedding-001",
   });
 
   console.log(`Embedding ${docs.length} clean chunks...`);
@@ -169,7 +169,7 @@ async function main() {
 
   fs.writeFileSync(
     "public/vector_store_precomputed.json",
-    JSON.stringify({ vectors, docs: serializedDocs, model: "models/text-embedding-004" }, null, 2)
+    JSON.stringify({ vectors, docs: serializedDocs,model: "models/gemini-embedding-001" }, null, 2)
   );
   console.log("✅ Saved precomputed vectors to vector_store_precomputed.json");
 }

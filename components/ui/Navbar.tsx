@@ -20,10 +20,9 @@ import { useCallback } from "react";
 
 export default function Navbar() {
   const { user, loginWithGoogle, logout } = useAuth();
-
+  console.log("USER:", user);
   // Prefer common avatar fields returned by different auth flows.
-  const avatarSrc =
-    user?.avatar_url ?? user?.photoURL ?? user?.picture ?? "/avatar-fallback.png";
+  const avatarSrc = user?.avatar_url || "/avatar-fallback.png";
 
   // onError handler for <img> to gracefully fallback to a local image if remote fails
   const handleAvatarError = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
@@ -67,7 +66,7 @@ export default function Navbar() {
                   // plain <img> used to avoid requiring next.config.js changes
                   <img
                     src={avatarSrc}
-                    alt={user.name ?? "avatar"}
+                    alt={user?.user_metadata?.full_name ?? "avatar"}
                     className="h-8 w-8 rounded-full object-cover"
                     onError={handleAvatarError}
                     // referrerPolicy helps with some profile image hosts blocking referers
@@ -80,7 +79,7 @@ export default function Navbar() {
                 )}
 
                 <span className="text-sm font-medium text-foreground">
-                  {user.name ?? user.email}
+                {user?.user_metadata?.full_name || user?.email}
                 </span>
 
                 <Button

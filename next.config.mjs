@@ -9,7 +9,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  output: 'export',          // enables static export
+  // output: 'export',          // enables static export
   trailingSlash: true        // optional, useful for S3
 };
 

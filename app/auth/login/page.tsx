@@ -1,34 +1,51 @@
 "use client";
 
-import React from "react";
-import Amplify, * as AmplifyAll from "aws-amplify";
+import { useState } from "react";
+import { getBrowserSupabase } from "@/lib/supabaseClient";
 
-// If TS complains about named export, use this runtime-safe import:
-const Auth = (AmplifyAll as any).Auth;
+export default function LoginPage() {
+  const supabase = getBrowserSupabase();
+  const [email, setEmail] = useState("");
 
-// (Assumes you already imported ./lib/amplify in your root layout so Amplify is configured)
+  const loginWithGoogle = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+    });
+  };
 
-const LoginPage: React.FC = () => {
-  const login = () => {
-    try {
-      Auth.federatedSignIn();
-    } catch (err) {
-      // runtime fallback
-      console.error("Auth.federatedSignIn failed:", err);
-    }
+  const loginWithMagicLink = async () => {
+    await supabase.auth.signInWithOtp({
+      email,
+    });
   };
 
   return (
-    <div className="p-10">
-      <h1 className="text-2xl font-bold">Login</h1>
+    <div className="p-10 max-w-md mx-auto">
+      <h1 className="text-2xl font-bold mb-6">Login</h1>
+
       <button
-        onClick={login}
-        className="mt-4 bg-blue-600 text-white px-4 py-2 rounded"
+        onClick={loginWithGoogle}
+        className="w-full bg-red-500 text-white py-2 rounded mb-4"
       >
-        Login with Cognito
+        Login with Google
+      </button>
+
+      <div className="my-4 text-center">OR</div>
+
+      <input
+        type="email"
+        placeholder="Enter email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="border p-2 w-full mb-3 rounded"
+      />
+
+      <button
+        onClick={loginWithMagicLink}
+        className="w-full bg-blue-600 text-white py-2 rounded"
+      >
+        Send Magic Link
       </button>
     </div>
   );
-};
-
-export default LoginPage;
+}
