@@ -13,8 +13,8 @@ if (!GOOGLE_KEY) {
   console.error("❌ Missing GOOGLE_API_KEY/GEMINI_API_KEY env var");
 }
 const VECTOR_FILE = "vector_store_precomputed.json"; // created by scripts/ingest.ts
-const GEN_MODEL = "models/gemini-2.5-flash";          // generation
-const EMBEDDING_MODEL = "models/text-embedding-004";  // embeddings used during ingestion
+const GEN_MODEL = "gemini-2.5-flash";          // generation
+const EMBEDDING_MODEL = "models/gemini-embedding-001";// embeddings used during ingestion
 const GEMINI_TIMEOUT_MS = 30000; // 30s guard
 
 const genAI = new GoogleGenerativeAI(GOOGLE_KEY || "");

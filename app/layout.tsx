@@ -6,7 +6,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { Suspense } from "react";
 import FloatingChatWidget from "@/components/ui/FloatingChatWidget";
 import "./globals.css";
-
+// import "../lib/amplify";
 import Navbar from "@/components/ui/Navbar"; // your Navbar (client)
 import { AuthProvider } from "@/lib/auth"; // AuthProvider must be a named export (client)
 

@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Link from "next/link";
+// import "../lib/amplify";
 import Image from "next/image";
 import { getBrowserSupabase } from "@/lib/supabaseClient";
 
@@ -17,17 +18,16 @@ type Plant = {
   scientific_name?: string | null;
   common_name?: string | null;
   sanskrit_name?: string | null;
-  common_names?: string[] | null;
+  common_names?: string | null;
   common_names_text?: string | null;
   family?: string | null;
   description?: string | null;
-  parts_used?: string[] | null;
-  medicinal_properties?: string[] | null;
-  ailments?: string[] | null;
-  uses?: string[] | null;
+  parts_used?: string | null;
+  medicinal_properties?: string | null;
+  ailments?: string | null;
+  uses?: string | null;
   dosage?: string | null;
   contraindications?: string | null;
-  metadata?: any;
   created_at?: string | null;
   updated_at?: string | null;
   // added locally:
@@ -56,15 +56,17 @@ export default function HomePage() {
   
       try {
         console.log("NEXT_PUBLIC_SUPABASE_URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
+//         console.log("URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
+// console.log("KEY:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
         const supabase = getBrowserSupabase();
 
         // 1) fetch plants
         const res = await supabase
           .from("plants")
           .select(
-            "id, common_name, scientific_name, sanskrit_name, common_names, common_names_text, family, description, parts_used, medicinal_properties, ailments, uses, dosage, contraindications, metadata, created_at, updated_at"
-          )
-          .limit(1000);
+            "id, common_name, scientific_name, sanskrit_name, family, description, parts_used, medicinal_properties, ailments, dosage, contraindications, created_at, updated_at"
+            )
+          .limit(2000);
 
         console.log("supabase select result:", res);
 
@@ -117,42 +119,41 @@ export default function HomePage() {
 
         // 3) attach resolved image URL to each plant (prefer image_url, then storage_path, then metadata)
         const basePublicUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
+        const normalized: Plant[] = data.map((p) => ({
+          ...p,
+          _image_url: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/plants/${p.id}.jpg`,
+        }));
+        // const normalized: Plant[] = data.map((p) => {
+        //   const imgRec = imagesMap[p.id];
+        //   let finalUrl: string | null = null;
+          
+        //   // console.log("image url for plant", p.id, finalUrl);
 
-        const normalized: Plant[] = data.map((p) => {
-          const imgRec = imagesMap[p.id];
-          let finalUrl: string | null = null;
-
-          if (imgRec?.image_url) {
-            finalUrl = imgRec.image_url;
-          } else if (imgRec?.storage_path) {
-            // storage_path might already include "bucket/path/to/file.jpg" or "path/to/file.jpg"
-            const sp = String(imgRec.storage_path);
-            // if storage_path looks like "bucket/...." or "public/..." use as-is after storage base
-            if (basePublicUrl) {
-              // If storage_path seems to already include "https://" assume full URL
-              if (sp.startsWith("http://") || sp.startsWith("https://")) {
-                finalUrl = sp;
-              } else {
-                // construct public storage url
-                // If storage path already contains a bucket (contains '/'), use it directly
-                // SUPABASE public URL format: {SUPABASE_URL}/storage/v1/object/public/<bucket>/<path...>
-                finalUrl = `${basePublicUrl}/storage/v1/object/public/${sp.replace(/^\/+/, "")}`;
-              }
-            } else {
-              // fallback: just use storage_path as relative URL
-              finalUrl = sp;
-            }
-          } else if (p.metadata && (p.metadata.image || p.metadata.image_url)) {
-            finalUrl = p.metadata.image ?? p.metadata.image_url ?? null;
-          } else {
-            finalUrl = null;
-          }
-
-          return {
-            ...p,
-            _image_url: finalUrl,
-          };
-        });
+        //   if (imgRec?.image_url) {
+        //     finalUrl = imgRec.image_url;
+          
+        //   } else if (imgRec?.storage_path) {
+        //     const sp = String(imgRec.storage_path);
+          
+        //     if (basePublicUrl) {
+        //       if (sp.startsWith("http://") || sp.startsWith("https://")) {
+        //         finalUrl = sp;
+        //       } else {
+        //         finalUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/plants/${p.id}.jpg`;
+        //       }
+        //     } else {
+        //       finalUrl = sp;
+        //     }
+          
+        //   } else {
+        //     finalUrl = null;
+        //   }
+          
+        //   return {
+        //     ...p,
+        //     _image_url: finalUrl,
+        //   };
+        // });
 
         if (!mounted) return;
         setPlants(normalized);
@@ -175,16 +176,43 @@ export default function HomePage() {
   // Build unique lists for filters
   const families = useMemo(() => Array.from(new Set(plants.map((p) => p.family).filter(Boolean as any))), [plants]);
   const partsUsed = useMemo(
-    () => Array.from(new Set(plants.flatMap((p) => (Array.isArray(p.parts_used) ? p.parts_used : []).filter(Boolean)))),
-    [plants],
+    () =>
+      Array.from(
+        new Set(
+          plants.flatMap((p) =>
+            p.parts_used
+              ? p.parts_used.split(",").map((s) => s.trim())
+              : []
+          )
+        )
+      ),
+    [plants]
   );
   const properties = useMemo(
-    () => Array.from(new Set(plants.flatMap((p) => (Array.isArray(p.medicinal_properties) ? p.medicinal_properties : []).filter(Boolean)))),
-    [plants],
+    () =>
+      Array.from(
+        new Set(
+          plants.flatMap((p) =>
+            p.medicinal_properties
+              ? p.medicinal_properties.split(",").map((s) => s.trim())
+              : []
+          )
+        )
+      ),
+    [plants]
   );
   const ailments = useMemo(
-    () => Array.from(new Set(plants.flatMap((p) => (Array.isArray(p.ailments) ? p.ailments : []).filter(Boolean)))),
-    [plants],
+    () =>
+      Array.from(
+        new Set(
+          plants.flatMap((p) =>
+            p.ailments
+              ? p.ailments.split(",").map((s) => s.trim())
+              : []
+          )
+        )
+      ),
+    [plants]
   );
 
   // Client-side filtering
@@ -198,10 +226,23 @@ export default function HomePage() {
         (p.common_names_text?.toLowerCase().includes(q) ?? false);
 
       const matchesFamily = !selectedFamily || p.family === selectedFamily;
-      const matchesPart = !selectedPartUsed || (p.parts_used ?? []).includes(selectedPartUsed);
-      const matchesProp = !selectedProperty || (p.medicinal_properties ?? []).includes(selectedProperty);
-      const matchesAil = !selectedAilment || (p.ailments ?? []).includes(selectedAilment);
+      const matchesPart =
+  !selectedPartUsed ||
+  (p.parts_used
+    ? p.parts_used.split(",").map((s) => s.trim()).includes(selectedPartUsed)
+    : false);
 
+const matchesProp =
+  !selectedProperty ||
+  (p.medicinal_properties
+    ? p.medicinal_properties.split(",").map((s) => s.trim()).includes(selectedProperty)
+    : false);
+
+const matchesAil =
+  !selectedAilment ||
+  (p.ailments
+    ? p.ailments.split(",").map((s) => s.trim()).includes(selectedAilment)
+    : false);
       return matchesQuery && matchesFamily && matchesPart && matchesProp && matchesAil;
     });
   }, [plants, searchQuery, selectedFamily, selectedPartUsed, selectedProperty, selectedAilment]);
@@ -429,9 +470,9 @@ export default function HomePage() {
 
 function PlantCard({ plant }: { plant: Plant }) {
   // priority: _image_url (from images table) -> metadata.image/_image_url -> placeholder
-  const fallback = "/placeholder.svg?height=200&width=300";
-  const candidate = plant._image_url ?? plant.metadata?.image ?? plant.metadata?.image_url ?? fallback;
-
+  const fallback = "public/placeholder.png?height=200&width=300";
+  // const candidate = plant._image_url ?? plant.metadata?.image ?? plant.metadata?.image_url ?? fallback;
+  const candidate = plant._image_url ?? fallback;
   // If candidate is null or empty -> use fallback
   const imgSrc = candidate || fallback;
 
@@ -444,7 +485,10 @@ function PlantCard({ plant }: { plant: Plant }) {
             alt={plant.common_name ?? "plant"}
             fill
             unoptimized={true} // allow external URLs without configuring domains in next.config.js
-            className="object-cover transition-transform duration-200 hover:scale-105"
+            className="object-contain bg-muted transition-transform duration-200 hover:scale-105"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = "public/placeholder.png";
+            }}
           />
         </div>
         <CardHeader className="pb-3">
@@ -468,27 +512,44 @@ function PlantCard({ plant }: { plant: Plant }) {
             <div>
               <div className="text-xs font-medium text-muted-foreground mb-1">Care requirments</div>
               <div className="flex flex-wrap gap-1">
-                {(Array.isArray(plant.parts_used) ? plant.parts_used : []).slice(0, 3).map((part) => (
-                  <Badge key={part} variant="outline" className="text-xs">
-                    {part}
-                  </Badge>
-                ))}
-                {(Array.isArray(plant.parts_used) ? plant.parts_used : []).length > 3 && (
-                  <Badge variant="outline" className="text-xs">+{(plant.parts_used ?? []).length - 3}</Badge>
-                )}
-              </div>
+  {(plant.parts_used ? plant.parts_used.split(",").map(s => s.trim()) : [])
+    .slice(0, 3)
+    .map((part) => (
+      <Badge key={part} variant="outline" className="text-xs">
+        {part}
+      </Badge>
+  ))}
+
+  {(plant.parts_used ? plant.parts_used.split(",").length : 0) > 3 && (
+    <Badge variant="outline" className="text-xs">
+      +{(plant.parts_used?.split(",").length ?? 0) - 3}
+    </Badge>
+  )}
+</div>
             </div>
 
             <div>
               <div className="text-xs font-medium text-muted-foreground mb-1">Key Properties</div>
               <div className="flex flex-wrap gap-1">
-                {(Array.isArray(plant.medicinal_properties) ? plant.medicinal_properties : []).slice(0, 2).map((property) => (
-                  <Badge key={property} variant="secondary" className="text-xs">{property}</Badge>
-                ))}
-                {(Array.isArray(plant.medicinal_properties) ? plant.medicinal_properties : []).length > 2 && (
-                  <Badge variant="secondary" className="text-xs">+{(plant.medicinal_properties ?? []).length - 2}</Badge>
-                )}
-              </div>
+  {(plant.medicinal_properties
+    ? plant.medicinal_properties.split(",").map(s => s.trim())
+    : []
+  )
+    .slice(0, 2)
+    .map((property) => (
+      <Badge key={property} variant="secondary" className="text-xs">
+        {property}
+      </Badge>
+  ))}
+
+  {(plant.medicinal_properties
+    ? plant.medicinal_properties.split(",").length
+    : 0) > 2 && (
+    <Badge variant="secondary" className="text-xs">
+      +{(plant.medicinal_properties?.split(",").length ?? 0) - 2}
+    </Badge>
+  )}
+</div>
             </div>
           </div>
         </CardContent>

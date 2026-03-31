@@ -11,6 +11,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@aws-amplify/ui-react": "^6.13.1",
     "@fontsource/geist": "^5.2.8",
     "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^3.10.0",
@@ -47,6 +48,7 @@
     "@supabase/supabase-js": "^2.57.4",
     "@vercel/analytics": "^1.5.0",
     "autoprefixer": "^10.4.20",
+    "aws-jwt-verify": "^5.1.1",
     "chromadb": "^3.0.15",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

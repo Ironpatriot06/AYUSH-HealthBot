@@ -22,8 +22,8 @@ export async function fetchPlants(limit = 1000) {
   const res = await supabase
     .from("plants")
     .select(
-      "id, common_name, scientific_name, sanskrit_name, common_names, common_names_text, family, description, parts_used, medicinal_properties, ailments, uses, dosage, contraindications, metadata, image_url, created_at, updated_at"
-    )
+      "id, common_name, scientific_name, sanskrit_name, family, description, parts_used, medicinal_properties, ailments, dosage, contraindications, created_at, updated_at"
+      )
     .limit(limit);
   return res;
 }
