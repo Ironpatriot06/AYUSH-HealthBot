@@ -4,7 +4,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { getBrowserSupabase } from "@/lib/supabaseClient";
 import { AuthProvider, useAuth } from "@/lib/auth";
 
 type LogRow = {
@@ -18,7 +18,7 @@ type LogRow = {
 
 function LogsInner() {
   const router = useRouter();
-  const supabase = useMemo(() => createClientComponentClient(), []);
+  const supabase = useMemo(() => getBrowserSupabase(), []);
   const { user, loading } = useAuth();
 
   const [rows, setRows] = useState<LogRow[]>([]);

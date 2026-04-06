@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useMemo, useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { getBrowserSupabase } from "@/lib/supabaseClient";
 
 function isValidEmail(v: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
@@ -12,7 +12,7 @@ function isStrongPassword(v: string) {
 }
 
 export default function AdminAuth(): JSX.Element {
-  const supabase = useMemo(() => createClientComponentClient(), []);
+  const supabase = useMemo(() => getBrowserSupabase(), []);
 
   const [mode, setMode] = useState<"magic" | "signin" | "signup">("magic");
   const [email, setEmail] = useState("");

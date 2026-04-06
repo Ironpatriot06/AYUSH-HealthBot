@@ -2,9 +2,9 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import type { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
+import { getBrowserSupabase } from "./supabaseClient";
 
 export type AdminUser = {
   id: string;
@@ -48,7 +48,7 @@ function mapSupabaseUser(u: User): AdminUser {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const supabase = useMemo(() => createClientComponentClient(), []);
+  const supabase = useMemo(() => getBrowserSupabase(), []);
   const router = useRouter();
   const [user, setUser] = useState<AdminUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -119,7 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${typeof window !== "undefined" ? window.location.origin : ""}/admin`,
+          redirectTo: `${typeof window !== "undefined" ? window.location.origin : ""}/auth/confirm`,
         },
       });
     } catch (err) {
@@ -131,15 +131,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(async () => {
     try {
-      await supabase.auth.signOut();
-      setUser(null);
+      console.log("Starting logout process...");
+      
+      // Add a timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Logout timeout after 5 seconds')), 5000)
+      );
+      
+      const signOutPromise = supabase.auth.signOut();
+      
       try {
-        router.push("/");
-      } catch {}
+        const result = await Promise.race([signOutPromise, timeoutPromise]);
+        console.log("SignOut result:", result);
+      } catch (timeoutError) {
+        console.warn("SignOut timed out, forcing local logout:", timeoutError);
+      }
+      
+      console.log("Clearing user state");
+      setUser(null);
+      
+      // Clear local storage manually
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.removeItem('supabase.auth.token');
+          sessionStorage.clear();
+        } catch (e) {
+          console.warn("Error clearing storage:", e);
+        }
+      }
+      
+      console.log("Redirecting to home page");
+      router.push("/");
+      setTimeout(() => {
+        router.refresh();
+        window.location.reload();
+      }, 100);
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.error("Sign out error:", err);
-      throw err;
+      // Force logout anyway
+      setUser(null);
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.clear();
+          sessionStorage.clear();
+        } catch (e) {}
+      }
+      router.push("/");
+      setTimeout(() => window.location.reload(), 100);
     }
   }, [supabase, router]);
 
@@ -161,7 +199,7 @@ export function useAuth() {
 export function withAuth<P extends object>(Component: React.ComponentType<P>) {
   return function WithAuthWrapper(props: P) {
     const { user, loading, loginWithGoogle } = useAuth();
-    const supabase = useMemo(() => createClientComponentClient(), []);
+    const supabase = useMemo(() => getBrowserSupabase(), []);
     const [mode, setMode] = useState<"signin" | "signup">("signin");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -200,7 +238,7 @@ export function withAuth<P extends object>(Component: React.ComponentType<P>) {
       setBusy(true);
       setMessage(null);
       try {
-        const redirectTo = `${typeof window !== "undefined" ? window.location.origin : ""}/admin`;
+        const redirectTo = `${typeof window !== "undefined" ? window.location.origin : ""}/auth/confirm`;
         const { error } = await supabase.auth.signInWithOtp({
           email,
           options: { emailRedirectTo: redirectTo },

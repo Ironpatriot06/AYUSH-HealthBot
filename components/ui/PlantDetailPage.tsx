@@ -51,9 +51,11 @@ export default function PlantDetailPage({ id }: { id: string }): JSX.Element {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log(">>> PlantDetailPage useEffect FIRED for ID:", id);
     let mounted = true;
 
     async function loadFromDb() {
+      console.log(">>> loadFromDb() CALLED for ID:", id);
       setLoading(true);
       setErrorMsg(null);
 
@@ -65,41 +67,40 @@ export default function PlantDetailPage({ id }: { id: string }): JSX.Element {
       }
 
       try {
+        console.log("Getting Supabase client for plant detail...");
         const supabase = getBrowserSupabase();
 
         // fetch plant
+        console.log("Fetching plant with ID:", plantId);
         const { data: plantData, error: plantError } = await supabase
           .from("plants")
           .select(
             `id,
              common_name,
              scientific_name,
-<<<<<<< HEAD
+
              sanskrit_name,
-             common_names,
-             common_names_text,
-=======
              
->>>>>>> feature/docker-setup
              family,
              description,
              parts_used,
              medicinal_properties,
              ailments,
-<<<<<<< HEAD
-             uses,
+
+             
              dosage,
              contraindications,
-             metadata,
-=======
+
              dosage,
              contraindications,
->>>>>>> feature/docker-setup
+
              created_at,
              updated_at`
           )
           .eq("id", plantId)
           .maybeSingle();
+        
+        console.log("Plant query result:", { plantData, plantError });
 
         if (plantError) {
           console.error("Error fetching plant:", plantError);
@@ -132,15 +133,15 @@ export default function PlantDetailPage({ id }: { id: string }): JSX.Element {
           if (imgError) {
             console.warn("Image fetch error:", imgError);
           } else if (imgData) {
-<<<<<<< HEAD
+
             imageUrl = imgData.storage_path ?? null;
-=======
+
             const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
 if (imgData?.storage_path) {
   imageUrl = `${base}/storage/v1/object/public/${imgData.storage_path}`;
 }
->>>>>>> feature/docker-setup
+
             // If using Supabase Storage: build public URL here if needed.
             // imageUrl = imgData.storage_path
             //   ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/<bucket>/${imgData.storage_path}`
@@ -166,13 +167,13 @@ if (imgData?.storage_path) {
               id: p.id,
               plant_id: p.plant_id,
               name: p.name,
-<<<<<<< HEAD
-              method: p.method,
-              notes: p.notes ?? null,
-=======
+
+              // method: p.method,
+              // notes: p.notes ?? null,
+
               method: p.steps ?? "",
               notes: p.ingredients ?? null,
->>>>>>> feature/docker-setup
+
               created_at: p.created_at,
             }));
           }
@@ -184,11 +185,11 @@ if (imgData?.storage_path) {
         let fetchedReferences: Reference[] = [];
         try {
           const { data: refData, error: refError } = await supabase
-<<<<<<< HEAD
+
             .from("references")
-=======
-            .from("plant_references")
->>>>>>> feature/docker-setup
+
+            // .from("plant_references")
+
             .select("*")
             .eq("plant_id", plantId)
             .order("id", { ascending: true });
@@ -218,17 +219,17 @@ if (imgData?.storage_path) {
           id: plantData.id,
           common_name: plantData.common_name ?? "",
           scientific_name: plantData.scientific_name ?? "",
-<<<<<<< HEAD
-          sanskrit_name: plantData.sanskrit_name ?? undefined,
-          common_names: Array.isArray(plantData.common_names)
-            ? plantData.common_names
-            : ensureStringArray(plantData.common_names ?? plantData.common_names_text),
-=======
+
           // sanskrit_name: plantData.sanskrit_name ?? undefined,
-          common_names: Array.isArray(plantData.common_name)
-            ? plantData.common_name
-            : ensureStringArray(plantData.common_name ?? plantData.common_name),
->>>>>>> feature/docker-setup
+          // common_names: Array.isArray(plantData.common_names)
+          //   ? plantData.common_names
+          //   : ensureStringArray(plantData.common_names ?? plantData.common_names_text),
+
+          // sanskrit_name: plantData.sanskrit_name ?? undefined,
+          // common_names: Array.isArray(plantData.common_name)
+          //   ? plantData.common_name
+          //   : ensureStringArray(plantData.common_name ?? plantData.common_name),
+
           family: plantData.family ?? "",
           description: plantData.description ?? "",
           parts_used: ensureStringArray(plantData.parts_used),
@@ -236,11 +237,11 @@ if (imgData?.storage_path) {
           ailments: ensureStringArray(plantData.ailments),
           dosage: plantData.dosage ?? null,
           contraindications: plantData.contraindications ?? null,
-<<<<<<< HEAD
-          image_url: imageUrl ?? (plantData.metadata?.image ?? plantData.metadata?.image_url ?? null),
-=======
-          image_url: imageUrl || "public/placeholder.png",
->>>>>>> feature/docker-setup
+
+          // image_url: imageUrl ?? (plantData.metadata?.image ?? plantData.metadata?.image_url ?? null),
+
+          image_url: imageUrl || "/placeholder.png",
+
           created_at: plantData.created_at ?? "",
           updated_at: plantData.updated_at ?? "",
           preparations: fetchedPreparations,
@@ -319,20 +320,20 @@ if (imgData?.storage_path) {
           <div className="lg:col-span-1">
             <div className="aspect-square relative overflow-hidden rounded-xl bg-muted">
               <Image
-<<<<<<< HEAD
+
                 src={String(plant.image_url ?? "/placeholder.svg?height=400&width=400")}
                 alt={plant.common_name ?? "Plant image"}
                 fill
                 className="object-cover"
-=======
-                src={String(plant.image_url ?? "public/placeholder.png?height=400&width=400")}
-                alt={plant.common_name ?? "Plant image"}
-                fill
-                className="object-contain"
+
+                // src={String(plant.image_url ?? "public/placeholder.png?height=400&width=400")}
+                // alt={plant.common_name ?? "Plant image"}
+                // fill
+                // className="object-contain"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = "public/placeholder.png";
                 }}
->>>>>>> feature/docker-setup
+
               />
             </div>
           </div>
@@ -351,16 +352,16 @@ if (imgData?.storage_path) {
                 <div>
                   <h3 className="font-semibold mb-2 flex items-center gap-2">
                     <Leaf className="h-4 w-4 text-primary" />
-<<<<<<< HEAD
+
                     Care Requirements
-=======
+
                     Parts Used:
->>>>>>> feature/docker-setup
+
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {partsUsed.length > 0 ? (
-                      partsUsed.map((part) => (
-                        <Badge key={part} variant="outline">
+                      partsUsed.map((part, idx) => (
+                        <Badge key={`part-${idx}`} variant="outline">
                           {part}
                         </Badge>
                       ))
@@ -377,8 +378,8 @@ if (imgData?.storage_path) {
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {properties.length > 0 ? (
-                      properties.slice(0, 4).map((property) => (
-                        <Badge key={property} variant="secondary">
+                      properties.slice(0, 4).map((property, idx) => (
+                        <Badge key={`prop-preview-${idx}`} variant="secondary">
                           {property}
                         </Badge>
                       ))
@@ -412,8 +413,8 @@ if (imgData?.storage_path) {
                 <CardContent>
                   <div className="grid grid-cols-2 gap-2">
                     {properties.length > 0 ? (
-                      properties.map((property) => (
-                        <Badge key={property} variant="secondary" className="justify-center">
+                      properties.map((property, idx) => (
+                        <Badge key={`prop-${idx}`} variant="secondary" className="justify-center">
                           {property}
                         </Badge>
                       ))
@@ -434,8 +435,8 @@ if (imgData?.storage_path) {
                 <CardContent>
                   <div className="space-y-2">
                     {ailments.length > 0 ? (
-                      ailments.map((ailment) => (
-                        <div key={ailment} className="flex items-center gap-2">
+                      ailments.map((ailment, idx) => (
+                        <div key={`ailment-${idx}`} className="flex items-center gap-2">
                           <div className="w-2 h-2 bg-primary rounded-full" />
                           <span className="text-sm">{ailment}</span>
                         </div>

@@ -4,11 +4,11 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
 const GEN_MODEL = 'models/gemini-2.5-flash';
-<<<<<<< HEAD
-const EMBED_MODEL = 'models/text-embedding-004';
-=======
-const EMBED_MODEL = "models/gemini-embedding-001";
->>>>>>> feature/docker-setup
+
+// const EMBED_MODEL = 'models/text-embedding-004';
+
+// const EMBED_MODEL = "models/gemini-embedding-001";
+
 const TIMEOUT_MS = 30000;
 const CORS_ORIGIN = process.env.CORS_ORIGIN || 'https://d112tlzkqjy7m4.cloudfront.net';
 

@@ -48,47 +48,76 @@ export default function HomePage() {
   const [selectedAilment, setSelectedAilment] = useState<string>("");
 
   useEffect(() => {
+    console.log(">>> useEffect FIRED <<<");
     let mounted = true;
   
     async function loadPlants() {
+      console.log(">>> loadPlants() CALLED <<<");
       setLoading(true);
       setErrorMsg(null);
   
       try {
-        console.log("NEXT_PUBLIC_SUPABASE_URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
-//         console.log("URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
-// console.log("KEY:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-        const supabase = getBrowserSupabase();
-
-        // 1) fetch plants
-        const res = await supabase
-          .from("plants")
-          .select(
-            "id, common_name, scientific_name, sanskrit_name, family, description, parts_used, medicinal_properties, ailments, dosage, contraindications, created_at, updated_at"
-            )
-          .limit(2000);
-
-        console.log("supabase select result:", res);
+        console.log("=== START LOADING PLANTS ===");
+        console.log("Supabase URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
+        console.log("Has API Key:", !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+        
+        // Create a manual fetch as fallback
+        const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/plants?select=id,common_name,scientific_name,family,description&limit=100`;
+        const apiKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+        
+        console.log("Fetch URL:", url);
+        
+      
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => {
+          console.error("FETCH TIMEOUT - aborting");
+          controller.abort();
+        }, 8000);
+        
+        console.log("Starting fetch...");
+        const fetchStart = Date.now();
+        
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'apikey': apiKey!,
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          signal: controller.signal,
+        });
+        
+        clearTimeout(timeoutId);
+        console.log("Fetch completed in", Date.now() - fetchStart, "ms");
+        console.log("Response status:", response.status);
+        console.log("Response ok:", response.ok);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Response error:", errorText);
+          throw new Error(`HTTP error! status: ${response.status}: ${errorText}`);
+        }
+        
+        console.log("Parsing JSON...");
+        const data = await response.json();
+        console.log("Fetched", data?.length, "plants");
+        console.log("First plant:", data?.[0]);
+        
+        console.log("Plants query result:", data);
 
         if (!mounted) return;
 
-        if (res.error) {
-          console.error("Error fetching plants (detailed):", res.error);
-          setErrorMsg(res.error.message ?? "Failed to fetch plants");
-          setPlants([]);
-          setLoading(false);
-          return;
-        }
-
-        const data = (res.data ?? []) as Plant[];
-        if (!data.length) {
+        const plantsData = (data ?? []) as Plant[];
+        console.log("Fetched plants count:", plantsData.length);
+        
+        if (!plantsData.length) {
           setPlants([]);
           setLoading(false);
           return;
         }
 
         // 2) fetch images for these plant ids
-        const ids = data.map((p) => p.id).filter(Boolean);
+        const ids = plantsData.map((p) => p.id).filter(Boolean);
         const imagesMap: Record<number, { image_url?: string | null; storage_path?: string | null }> = {};
 
         try {
@@ -96,7 +125,7 @@ export default function HomePage() {
             .from("images")
             .select("id, plant_id, storage_path")
             .in("plant_id", ids)
-            .limit(2000); // safety cap
+            .limit(1000); // safety cap
 
           if (imgRes.error) {
             console.warn("Images fetch error (ignored):", imgRes.error);
@@ -119,7 +148,7 @@ export default function HomePage() {
 
         // 3) attach resolved image URL to each plant (prefer image_url, then storage_path, then metadata)
         const basePublicUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
-        const normalized: Plant[] = data.map((p) => ({
+        const normalized: Plant[] = plantsData.map((p) => ({
           ...p,
           _image_url: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/plants/${p.id}.jpg`,
         }));
@@ -338,8 +367,8 @@ const matchesAil =
       families
         .map((f) => String(f ?? "").trim())
         .filter((f) => f !== "")
-        .map((f) => (
-          <SelectItem key={f} value={f}>
+        .map((f, idx) => (
+          <SelectItem key={`family-${f}-${idx}`} value={f}>
             {f}
           </SelectItem>
         ))
@@ -361,8 +390,8 @@ const matchesAil =
       partsUsed
         .map((p) => String(p ?? "").trim())
         .filter((p) => p !== "")
-        .map((p) => (
-          <SelectItem key={p} value={p}>
+        .map((p, idx) => (
+          <SelectItem key={`part-${p}-${idx}`} value={p}>
             {p}
           </SelectItem>
         ))
@@ -384,8 +413,8 @@ const matchesAil =
       properties
         .map((pr) => String(pr ?? "").trim())
         .filter((pr) => pr !== "")
-        .map((pr) => (
-          <SelectItem key={pr} value={pr}>
+        .map((pr, idx) => (
+          <SelectItem key={`prop-${pr}-${idx}`} value={pr}>
             {pr}
           </SelectItem>
         ))
@@ -407,8 +436,8 @@ const matchesAil =
       ailments
         .map((a) => String(a ?? "").trim())
         .filter((a) => a !== "")
-        .map((a) => (
-          <SelectItem key={a} value={a}>
+        .map((a, idx) => (
+          <SelectItem key={`ailment-${a}-${idx}`} value={a}>
             {a}
           </SelectItem>
         ))
@@ -514,8 +543,8 @@ function PlantCard({ plant }: { plant: Plant }) {
               <div className="flex flex-wrap gap-1">
   {(plant.parts_used ? plant.parts_used.split(",").map(s => s.trim()) : [])
     .slice(0, 3)
-    .map((part) => (
-      <Badge key={part} variant="outline" className="text-xs">
+    .map((part, idx) => (
+      <Badge key={`${plant.id}-part-${idx}`} variant="outline" className="text-xs">
         {part}
       </Badge>
   ))}
@@ -536,8 +565,8 @@ function PlantCard({ plant }: { plant: Plant }) {
     : []
   )
     .slice(0, 2)
-    .map((property) => (
-      <Badge key={property} variant="secondary" className="text-xs">
+    .map((property, idx) => (
+      <Badge key={`${plant.id}-prop-${idx}`} variant="secondary" className="text-xs">
         {property}
       </Badge>
   ))}

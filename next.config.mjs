@@ -9,11 +9,11 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-<<<<<<< HEAD
-  output: 'export',          // enables static export
-=======
+
   // output: 'export',          // enables static export
->>>>>>> feature/docker-setup
+
+  // output: 'export',          // enables static export
+
   trailingSlash: true        // optional, useful for S3
 };
 

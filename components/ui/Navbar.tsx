@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth"; // ✅ bring in auth context
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 /**
  * Full fixed Navbar component.
@@ -20,6 +20,8 @@ import { useCallback } from "react";
 
 export default function Navbar() {
   const { user, loginWithGoogle, logout } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  
   console.log("USER:", user);
   // Prefer common avatar fields returned by different auth flows.
   const avatarSrc = user?.avatar_url || "/avatar-fallback.png";
@@ -33,6 +35,23 @@ export default function Navbar() {
       img.onerror = null;
     }
   }, []);
+
+  const handleLogout = useCallback(async () => {
+    if (isLoggingOut) return;
+    
+    setIsLoggingOut(true);
+    try {
+      console.log("Navbar: Attempting to log out...");
+      await logout();
+      console.log("Navbar: Logout successful");
+    } catch (error) {
+      console.error("Navbar: Logout failed:", error);
+      // Force a page reload even if logout failed
+      window.location.href = "/";
+    } finally {
+      setIsLoggingOut(false);
+    }
+  }, [logout, isLoggingOut]);
 
   return (
     <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
@@ -66,7 +85,7 @@ export default function Navbar() {
                   // plain <img> used to avoid requiring next.config.js changes
                   <img
                     src={avatarSrc}
-                    alt={user?.user_metadata?.full_name ?? "avatar"}
+                    alt={user?.name ?? "avatar"}
                     className="h-8 w-8 rounded-full object-cover"
                     onError={handleAvatarError}
                     // referrerPolicy helps with some profile image hosts blocking referers
@@ -79,16 +98,17 @@ export default function Navbar() {
                 )}
 
                 <span className="text-sm font-medium text-foreground">
-                {user?.user_metadata?.full_name || user?.email}
+                {user?.name || user?.email}
                 </span>
 
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={logout}
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
                   className="hover:bg-transparent hover:text-inherit"
                 >
-                  Sign Out
+                  {isLoggingOut ? "Signing out..." : "Sign Out"}
                 </Button>
               </div>
             ) : (

@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { getBrowserSupabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -16,7 +16,7 @@ type PlantLite = {
 
 export default function AdminDashboard(): JSX.Element | null {
   const router = useRouter();
-  const supabase = useMemo(() => createClientComponentClient(), []);
+  const supabase = useMemo(() => getBrowserSupabase(), []);
   const { user, loading, logout } = useAuth();
 
   // UI state

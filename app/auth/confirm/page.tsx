@@ -1,17 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { useRouter } from 'next/navigation';
+import { getBrowserSupabase } from '@/lib/supabaseClient';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
-// make Next treat this as static-friendly
-export const dynamic = 'force-static';
+const supabase = getBrowserSupabase();
 
 export default function AuthConfirmPage() {
+  const router = useRouter();
+
   const [status, setStatus] = useState<'working'|'ok'|'err'>('working');
   const [msg, setMsg] = useState('Finishing sign-in…');
 
@@ -20,24 +17,29 @@ export default function AuthConfirmPage() {
       try {
         const url = new URL(window.location.href);
 
-        // 1) Try PKCE / magic link exchange (?code=...)
+        // 1️⃣ PKCE / magic link exchange
         const hasCode = !!url.searchParams.get('code');
         if (hasCode) {
-          const { error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+          const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
           if (error) throw error;
-          setStatus('ok'); setMsg('Signed in! You can close this tab or go back.');
+        
+          if (data?.session) {
+            router.replace('/admin');
+          }
           return;
         }
 
-        // 2) Try hash tokens (#access_token=...)
+        // 2️⃣ Hash token flow
         if (window.location.hash.startsWith('#')) {
           const h = new URLSearchParams(window.location.hash.slice(1));
           const access_token = h.get('access_token');
           const refresh_token = h.get('refresh_token');
+
           if (access_token && refresh_token) {
             const { error } = await supabase.auth.setSession({ access_token, refresh_token });
             if (error) throw error;
-            setStatus('ok'); setMsg('Signed in! You can close this tab or go back.');
+
+            router.replace('/admin');
             return;
           }
         }
@@ -49,16 +51,13 @@ export default function AuthConfirmPage() {
         setMsg(e?.message || 'Auth confirmation failed.');
       }
     })();
-  }, []);
+  }, [router]);
 
   return (
-    <main style={{minHeight:'60vh',display:'grid',placeItems:'center',fontFamily:'ui-sans-serif'}}>
+    <main style={{minHeight:'60vh',display:'grid',placeItems:'center'}}>
       <div style={{textAlign:'center',maxWidth:520}}>
         <h1 style={{fontSize:22,marginBottom:8}}>Auth Confirmation</h1>
         <p>{msg}</p>
-        {status==='ok' && (
-          <a href="/" style={{display:'inline-block',marginTop:16,textDecoration:'underline'}}>Go to Home</a>
-        )}
       </div>
     </main>
   );
